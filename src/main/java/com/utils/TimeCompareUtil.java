@@ -1,6 +1,7 @@
 package com.utils;
 
 import com.entity.BaseEntity;
+import com.entity.PubCommon;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -22,19 +23,7 @@ import java.util.stream.Stream;
  */
 public class TimeCompareUtil {
 
-    public static final String DEFAULT_FORMAT = "yyyyMMddHHmmssSSS";
-    public static final String DEFAULT_FORMAT_STRING = "yyyyMMddHHmmss";
-    public static final String DEFAULT_FORMAT_YYYYMMDD = "yyyyMMdd";
-    public static final String DEFAULT_FORMAT_YYYYMMDDHHMMSS = "yyyyMMddhhmmss";
-    public static final String DEFAULT_FORMAT_YYYY = "yyyy";
-    public static final String DEFAULT_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
-    public static final String DEFAULT_FORMAT_YYYY_MM = "yyyy-MM";
-    public static final String DEFAULT_YEAR_MON_DAY = "yyyy-MM-dd HH:mm:ss";
-    public static final String DEFAULT_YEAR_MON_DAY2 = "yyyy/MM/dd HH:mm:ss";
-    private static String[] parsePatterns = {
-            "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM",
-            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM",
-            "yyyy.MM.dd", "yyyy.MM.dd HH:mm:ss", "yyyy.MM.dd HH:mm", "yyyy.MM"};
+
 
 
     /***********************************************日使者 ( • ̀ω•́ )✧ start****************************************************************/
@@ -131,8 +120,8 @@ public class TimeCompareUtil {
      * @throws ParseException
      */
     private static int dayDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
         long day = ChronoUnit.DAYS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(day);
         return result;
@@ -146,8 +135,8 @@ public class TimeCompareUtil {
      */
     public static List<String> getBetweenDate(String start, String end) {
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
 
         long distance = ChronoUnit.DAYS.between(startDate, endDate);
         if (distance < 1) {
@@ -190,8 +179,8 @@ public class TimeCompareUtil {
      * @return
      */
     private static int monthDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
         long month = ChronoUnit.MONTHS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(month);
         return result;
@@ -204,10 +193,10 @@ public class TimeCompareUtil {
      * @return
      */
     public static List<String> getBetweenMonth(String start, String end) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DEFAULT_FORMAT_YYYY_MM);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY_MM);
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
 
         long distance = ChronoUnit.MONTHS.between(startDate, endDate);
         if (distance < 1) {
@@ -231,8 +220,8 @@ public class TimeCompareUtil {
      * @return
      */
     private static int yearDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
         long year = ChronoUnit.YEARS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(year);
         return result;
@@ -245,10 +234,10 @@ public class TimeCompareUtil {
      * @return
      */
     public static List<String> getBetweenYear(String start, String end) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DEFAULT_FORMAT_YYYY);
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY);
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
         long distance = ChronoUnit.YEARS.between(startDate, endDate);
         if (distance < 1) {
             return list;
@@ -260,12 +249,10 @@ public class TimeCompareUtil {
         });
         return list;
     }
-
-
-
-
-
     /***********************************************年使者 ヾ(◍°∇°◍)ﾉﾞ end****************************************************************/
+
+
+
     /**
      * 时间填充者 (　 ´-ω ･)▄︻┻┳══━一
      * @param dataEntityList    旧时间结构list
