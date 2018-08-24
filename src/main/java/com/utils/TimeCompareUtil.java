@@ -26,6 +26,7 @@ public class TimeCompareUtil {
     public static final String DEFAULT_FORMAT_STRING = "yyyyMMddHHmmss";
     public static final String DEFAULT_FORMAT_YYYYMMDD = "yyyyMMdd";
     public static final String DEFAULT_FORMAT_YYYYMMDDHHMMSS = "yyyyMMddhhmmss";
+    public static final String DEFAULT_FORMAT_YYYY = "yyyy";
     public static final String DEFAULT_FORMAT_YYYY_MM_DD = "yyyy-MM-dd";
     public static final String DEFAULT_FORMAT_YYYY_MM = "yyyy-MM";
     public static final String DEFAULT_YEAR_MON_DAY = "yyyy-MM-dd HH:mm:ss";
@@ -222,7 +223,49 @@ public class TimeCompareUtil {
     /***********************************************月使者 =￣ω￣= end****************************************************************/
 
 
+    /***********************************************年使者 ヾ(◍°∇°◍)ﾉﾞ start****************************************************************/
+    /**
+     * 计算两年的时间间隔
+     * @param strDate1
+     * @param strDate2
+     * @return
+     */
+    private static int yearDistance(String strDate1, String strDate2) {
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        long year = ChronoUnit.YEARS.between(beginDateTime, endDateTime);
+        int result = (int) Math.abs(year);
+        return result;
+    }
 
+    /**
+     * 获取两个年之间的所有年
+     * @param start
+     * @param end
+     * @return
+     */
+    public static List<String> getBetweenYear(String start, String end) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(DEFAULT_FORMAT_YYYY);
+        List<String> list = new ArrayList<>();
+        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        long distance = ChronoUnit.YEARS.between(startDate, endDate);
+        if (distance < 1) {
+            return list;
+        }
+        Stream.iterate(startDate, y -> {
+            return y.plusYears(1);
+        }).limit(distance + 1).forEach(f -> {
+            list.add(f.format(dtf));
+        });
+        return list;
+    }
+
+
+
+
+
+    /***********************************************年使者 ヾ(◍°∇°◍)ﾉﾞ end****************************************************************/
     /**
      * 时间填充者 (　 ´-ω ･)▄︻┻┳══━一
      * @param dataEntityList    旧时间结构list
@@ -259,7 +302,7 @@ public class TimeCompareUtil {
         String end = "2018-09-12 00:00:00";
 //        List<BaseEChartsDataEntity> dataEntityList = new ArrayList<>();
 //        completionDate(dataEntityList, begin, end);
-        System.out.println(getBetweenMonth(begin,end));
+        System.out.println(yearDistance(begin,end));
 
     }
 
