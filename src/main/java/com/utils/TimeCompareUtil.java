@@ -1,6 +1,7 @@
 package com.utils;
 
 import com.entity.BaseEntity;
+import com.entity.DateRangeEntity;
 import com.entity.PubCommon;
 
 import java.text.DateFormat;
@@ -12,7 +13,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static com.entity.PubCommon.DEFAULT_FORMAT_YYYY_MM_DD;
+import static com.entity.PubCommon.DEFAULT_YEAR_MON_DAY;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,9 +30,7 @@ import java.util.stream.Stream;
 public class TimeCompareUtil {
 
 
-
-
-    /***********************************************日使者 ( • ̀ω•́ )✧ start****************************************************************/
+    /***********************************************日 start****************************************************************/
     /**
      * 取两个日期里早的
      *
@@ -107,6 +111,7 @@ public class TimeCompareUtil {
         List<String> dateList = getBetweenDate(begin,end);
         //时间填充
         List<BaseEntity> newEntityList = fillTheTime(dataEntityList, dateList);
+
         return newEntityList;
     }
 
@@ -120,8 +125,8 @@ public class TimeCompareUtil {
      * @throws ParseException
      */
     private static int dayDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
         long day = ChronoUnit.DAYS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(day);
         return result;
@@ -135,26 +140,29 @@ public class TimeCompareUtil {
      */
     public static List<String> getBetweenDate(String start, String end) {
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-
-        long distance = ChronoUnit.DAYS.between(startDate, endDate);
-        if (distance < 1) {
-            return list;
+        //判断日期格式
+        DateRangeEntity dateRangeEntity = patternDate(start,end);
+        if (dateRangeEntity!=null) {
+            LocalDate startDate = dateRangeEntity.getStart();
+            LocalDate endDate = dateRangeEntity.getEnd();
+            long distance = ChronoUnit.DAYS.between(startDate, endDate);
+            if (distance < 1) {
+                return list;
+            }
+            Stream.iterate(startDate, d -> {
+                return d.plusDays(1);
+            }).limit(distance + 1).forEach(f -> {
+                list.add(f.toString());
+            });
         }
-        Stream.iterate(startDate, d -> {
-            return d.plusDays(1);
-        }).limit(distance + 1).forEach(f -> {
-            list.add(f.toString());
-        });
         return list;
     }
-    /***********************************************日使者 ( • ̀ω•́ )✧ end****************************************************************/
+    /***********************************************日 end****************************************************************/
 
 
 
 
-    /***********************************************月使者 =￣ω￣= start****************************************************************/
+    /***********************************************月 start****************************************************************/
     /**
      * 月份补0，包括中间空余的日期
      *
@@ -179,8 +187,8 @@ public class TimeCompareUtil {
      * @return
      */
     private static int monthDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
         long month = ChronoUnit.MONTHS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(month);
         return result;
@@ -195,24 +203,48 @@ public class TimeCompareUtil {
     public static List<String> getBetweenMonth(String start, String end) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY_MM);
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-
-        long distance = ChronoUnit.MONTHS.between(startDate, endDate);
-        if (distance < 1) {
-            return list;
+        //判断日期格式
+        DateRangeEntity dateRangeEntity = patternDate(start,end);
+        if (dateRangeEntity!=null){
+            LocalDate startDate = dateRangeEntity.getStart();
+            LocalDate endDate = dateRangeEntity.getEnd();
+            long distance = ChronoUnit.MONTHS.between(startDate, endDate);
+            if (distance < 1) {
+                return list;
+            }
+            Stream.iterate(startDate, m -> {
+                return m.plusMonths(1);
+            }).limit(distance + 1).forEach(f -> {
+                list.add(f.format(dtf));
+            });
         }
-        Stream.iterate(startDate, m -> {
-            return m.plusMonths(1);
-        }).limit(distance + 1).forEach(f -> {
-            list.add(f.format(dtf));
-        });
         return list;
     }
-    /***********************************************月使者 =￣ω￣= end****************************************************************/
+    /***********************************************月使者 end****************************************************************/
+
+
+
 
 
     /***********************************************年使者 ヾ(◍°∇°◍)ﾉﾞ start****************************************************************/
+
+    /**
+     * 年补0，包括中间空余的日期
+     *
+     * @param dataEntityList
+     * @param begin
+     * @param end
+     * @return
+     */
+    public static List<BaseEntity> completionYear(List<BaseEntity> dataEntityList, String begin, String end) {
+        //计算开始和结束的时间间隔
+        List<String> yearList = getBetweenYear(begin,end);
+        //时间填充
+        List<BaseEntity> newEntityList = fillTheTime(dataEntityList, yearList);
+        return newEntityList;
+    }
+
+
     /**
      * 计算两年的时间间隔
      * @param strDate1
@@ -220,8 +252,8 @@ public class TimeCompareUtil {
      * @return
      */
     private static int yearDistance(String strDate1, String strDate2) {
-        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        LocalDate beginDateTime = LocalDate.parse(strDate1, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
+        LocalDate endDateTime = LocalDate.parse(strDate2, DateTimeFormatter.ofPattern(DEFAULT_YEAR_MON_DAY));
         long year = ChronoUnit.YEARS.between(beginDateTime, endDateTime);
         int result = (int) Math.abs(year);
         return result;
@@ -236,22 +268,24 @@ public class TimeCompareUtil {
     public static List<String> getBetweenYear(String start, String end) {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY);
         List<String> list = new ArrayList<>();
-        LocalDate startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        LocalDate endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
-        long distance = ChronoUnit.YEARS.between(startDate, endDate);
-        if (distance < 1) {
-            return list;
+        DateRangeEntity dateRangeEntity = patternDate(start,end);
+        if (dateRangeEntity!=null) {
+            LocalDate startDate = dateRangeEntity.getStart();
+            LocalDate endDate = dateRangeEntity.getEnd();
+            long distance = ChronoUnit.YEARS.between(startDate, endDate);
+            if (distance < 1) {
+                return list;
+            }
+            Stream.iterate(startDate, y -> {
+                return y.plusYears(1);
+            }).limit(distance + 1).forEach(f -> {
+                list.add(f.format(dtf));
+            });
         }
-        Stream.iterate(startDate, y -> {
-            return y.plusYears(1);
-        }).limit(distance + 1).forEach(f -> {
-            list.add(f.format(dtf));
-        });
         return list;
     }
+
     /***********************************************年使者 ヾ(◍°∇°◍)ﾉﾞ end****************************************************************/
-
-
 
     /**
      * 时间填充者 (　 ´-ω ･)▄︻┻┳══━一
@@ -284,12 +318,44 @@ public class TimeCompareUtil {
         return newEntityList;
     }
 
+
+    /**
+     * 正则监管者  (〝▼皿▼)
+     * 正则判断传过来的日期的格式
+     * @param start
+     * @param end
+     * @return
+     */
+    private static DateRangeEntity patternDate(String start, String end){
+        LocalDate startDate = null;
+        LocalDate endDate = null;
+        //yyyy-MM-dd
+        String regexDate = "[0-9]{4}-[0-9]{2}-[0-9]{2}";
+        //yyyy-MM-dd HH:mm:ss
+        String regexDateDetail = "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}";
+        DateRangeEntity dateRangeEntity = new DateRangeEntity();
+        if (Pattern.compile(regexDate).matcher(start).matches() && Pattern.compile(regexDate).matcher(end).matches()){
+            //符合yyyy-MM-dd
+            startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY_MM_DD));
+            endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_FORMAT_YYYY_MM_DD));
+
+        }else if (Pattern.compile(regexDateDetail).matcher(start).matches() && Pattern.compile(regexDateDetail).matcher(end).matches()){
+            //符合yyyy-MM-dd HH:mm:ss
+            startDate = LocalDate.parse(start, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+            endDate = LocalDate.parse(end, DateTimeFormatter.ofPattern(PubCommon.DEFAULT_YEAR_MON_DAY));
+        }
+        dateRangeEntity.setStart(startDate);
+        dateRangeEntity.setEnd(endDate);
+        return dateRangeEntity;
+    }
+
+
     public static void main(String[] args) {
         String begin = "2018-05-01 00:00:00";
         String end = "2018-09-12 00:00:00";
 //        List<BaseEChartsDataEntity> dataEntityList = new ArrayList<>();
 //        completionDate(dataEntityList, begin, end);
-        System.out.println(yearDistance(begin,end));
+        System.out.println(getBetweenMonth(begin,end));
 
     }
 
